@@ -104,6 +104,19 @@ For each scheduler:
 - **FXML**: Markup language for UI layouts.
 - **Maven**: Dependency management tool.
 
+
+## **Project Structure**
+```plaintext
+src/
+├── main/
+│   ├── java/
+│   │   └── com.example.project/
+│   │       ├── MainApplication.java         # Entry point for the application
+│   │       ├── SchedulerController.java     # Handles UI interactions and logic
+│   │       ├── Process.java                 # Model class for process data
+│   ├── resources/
+│       └── com.example.project/
+│           └── main-view.fxml               # FXML file for the main UI
 ---
 
 ## **Setup Instructions**
