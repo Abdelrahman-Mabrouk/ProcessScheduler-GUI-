@@ -103,7 +103,8 @@ For each scheduler:
 - **JavaFX**: Framework for GUI development.
 - **FXML**: Markup language for UI layouts.
 - **Maven**: Dependency management tool.
-
+- 
+---
 
 ## **Project Structure**
 ```plaintext
@@ -117,6 +118,7 @@ src/
 │   ├── resources/
 │       └── com.example.project/
 │           └── main-view.fxml               # FXML file for the main UI
+
 ---
 
 ## **Setup Instructions**
