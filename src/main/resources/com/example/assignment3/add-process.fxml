@@ -9,6 +9,7 @@
     <TextField fx:id="arrivalTimeField" promptText="Arrival Time"/>
     <TextField fx:id="burstTimeField" promptText="Burst Time"/>
     <TextField fx:id="priorityField" promptText="Priority"/>
+    <TextField fx:id="quantumField" promptText="Quantum (Only for FCAI)" visible="false"/> <!-- Hiding the quantum field initially -->
     <HBox spacing="10">
         <Button text="Add" onAction="#onAddClicked"/>
         <Button text="Cancel" onAction="#onCancelClicked"/>
