@@ -1,4 +1,5 @@
 package com.example.assignment3;
+import javafx.scene.paint.Color;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -6,13 +7,15 @@ import javafx.scene.control.*;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.collections.FXCollections;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
+
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javafx.fxml.FXMLLoader;
@@ -21,6 +24,7 @@ import javafx.scene.Scene;
 
 
 import java.io.IOException;
+import java.util.Map;
 
 import javafx.scene.control.ComboBox;
 
@@ -57,30 +61,91 @@ public class SchedulerController {
 
     private List<Process> processes = FXCollections.observableArrayList();
 
+    // HashMap لتخزين الألوان المستخدمة بالفعل لتجنب التكرار
+    private Map<String, Color> usedColors = new HashMap<>();
+
+    // قائمة من الألوان المحتملة باستخدام "Color.web()" للحصول على الألوان
+    private static final Color[] COLORS = {
+            Color.web("lightgreen"), Color.web("lightblue"), Color.web("lightcoral"), Color.web("lightyellow"),
+            Color.web("palegreen"), Color.web("palevioletred"), Color.web("plum"), Color.web("mediumpurple"),
+            Color.web("mediumturquoise"), Color.web("mediumorchid"), Color.web("salmon"), Color.web("lavenderblush"),
+            Color.web("gold"), Color.web("lightpink"), Color.web("mistyrose"), Color.web("seashell"),
+            Color.web("mediumseagreen"), Color.web("skyblue"), Color.web("cornflowerblue"), Color.web("royalblue"),
+            Color.web("dodgerblue"), Color.web("chocolate"), Color.web("orangered"), Color.web("yellowgreen"),
+            Color.web("limegreen"), Color.web("turquoise"), Color.web("indianred"), Color.web("darkkhaki")
+    };
 
     @FXML
-    public void initialize() {
+    private void initialize() {
+        // إعداد الأعمدة
         colName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         colArrivalTime.setCellValueFactory(cellData -> cellData.getValue().arrivalTimeProperty().asObject());
         colBurstTime.setCellValueFactory(cellData -> cellData.getValue().burstTimeProperty().asObject());
         colPriority.setCellValueFactory(cellData -> cellData.getValue().priorityProperty().asObject());
 
+        // إضافة الأعمدة الخاصة بـ waiting time و turnaround time
         colWaitingTime.setCellValueFactory(cellData -> cellData.getValue().waitingTimeProperty().asObject());
         colTurnaroundTime.setCellValueFactory(cellData -> cellData.getValue().turnaroundTimeProperty().asObject());
-
-            // إضافة الخوارزميات المتاحة إلى ComboBox
+        // إضافة الخوارزميات المتاحة إلى ComboBox
         algorithmComboBox.setItems(FXCollections.observableArrayList(
                 "Priority Scheduling",
                 "Shortest Job First (SJF)",
                 "Shortest Remaining Time First (SRTF)",
                 "FCAI Scheduling"
         ));
+        // تخصيص الألوان للعمليات بناءً على الاسم
+        colName.setCellFactory(cell -> new TableCell<Process, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item);
 
+                    // التحقق من اللون لكل عملية بناءً على اسمها
+                    Process process = getTableRow().getItem();
+                    if (process != null) {
+                        String processName = process.getName();
 
-        // ربط TableView بالـ ObservableList
-        processTable.setItems(processList);  // تأكد من ربط TableView بـ ObservableList
+                        // إذا لم يتم استخدام اللون من قبل، اختر لون جديد
+                        if (!usedColors.containsKey(processName)) {
+                            // تحديد اللون الأولي
+                            Color color = getRandomColor();
+                            usedColors.put(processName, color); // إضافة اللون إلى الخريطة
+                        }
+
+                        // تعيين اللون للعملية
+                        Color processColor = usedColors.get(processName);
+                        setStyle("-fx-background-color: " + rgbToHex(processColor) + ";");
+                    }
+                }
+            }
+        });
+
+        // إضافة العمليات إلى الجدول
+        processTable.setItems(processList);
+    }
+    // الحصول على لون عشوائي غير مستخدم
+    private Color getRandomColor() {
+        for (Color color : COLORS) {
+            boolean colorUsed = usedColors.containsValue(color);
+            if (!colorUsed) {
+                return color;
+            }
+        }
+        // إذا كانت جميع الألوان مستخدمة، قم بإرجاع أول لون
+        return COLORS[0];
     }
 
+    // تحويل لون إلى قيمة HEX
+    private String rgbToHex(Color color) {
+        return String.format("#%02X%02X%02X",
+                (int)(color.getRed() * 255),
+                (int)(color.getGreen() * 255),
+                (int)(color.getBlue() * 255));
+    }
 
     // Define the UI elements
 
@@ -119,7 +184,6 @@ public class SchedulerController {
 
 
 
-
     @FXML
     public void onLoadFromFile() {
         FileChooser fileChooser = new FileChooser();
@@ -131,25 +195,13 @@ public class SchedulerController {
 
         if (selectedFile != null) {
             try {
-                // قراءة البيانات من الملف
+                // قراءة العمليات من الملف
                 List<Process> processesFromFile = TXTReader.readProcessesFromTXT(selectedFile.getAbsolutePath());
 
-                // التحقق من وجود العمليات في القائمة قبل إضافتها
-                for (Process newProcess : processesFromFile) {
-                    // تحقق من وجود عملية بنفس الاسم
-                    boolean exists = processList.stream()
-                            .anyMatch(existingProcess -> existingProcess.getName().equalsIgnoreCase(newProcess.getName()));
+                // إضافة العمليات من الملف إلى القائمة الحالية
+                processList.addAll(processesFromFile);  // إضافة العمليات إلى القائمة بدلاً من استبدالها
 
-                    if (!exists) {
-                        // إذا لم تكن موجودة، أضف العملية الجديدة
-                        processList.add(newProcess);
-                    } else {
-                        // إذا كانت موجودة، اعرض رسالة للمستخدم أو تعامل معها كما ترغب
-                        showError("Duplicate Process", "Process " + newProcess.getName() + " already exists.");
-                    }
-                }
-
-                // تحديث الجدول بعد إضافة العمليات الجديدة
+                // تحديث الجدول
                 processTable.refresh();
                 showInfo("File Loaded", "Processes loaded successfully from the file.");
             } catch (IOException e) {
@@ -157,6 +209,7 @@ public class SchedulerController {
             }
         }
     }
+
 
 
 
