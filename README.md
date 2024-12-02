@@ -119,16 +119,3 @@ src/
 │       └── com.example.project/
 │           └── main-view.fxml               # FXML file for the main UI
 
----
-
-## **Setup Instructions**
-
-### **Prerequisites**
-- Java Development Kit (JDK) 11 or higher.
-- JavaFX SDK 11 or higher.
-- IntelliJ IDEA (recommended) or any IDE supporting JavaFX.
-
-### **Setup Steps**
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/cpu-scheduler-simulator.git
