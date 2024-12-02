@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      alignment="CENTER" spacing="10" fx:controller="com.example.assignment3.AddProcessController">
+    <Label text="Add New Process" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+    <TextField fx:id="nameField" promptText="Process Name"/>
+    <TextField fx:id="arrivalTimeField" promptText="Arrival Time"/>
+    <TextField fx:id="burstTimeField" promptText="Burst Time"/>
+    <TextField fx:id="priorityField" promptText="Priority"/>
+    <HBox spacing="10">
+        <Button text="Add" onAction="#onAddClicked"/>
+        <Button text="Cancel" onAction="#onCancelClicked"/>
+    </HBox>
+</VBox>
