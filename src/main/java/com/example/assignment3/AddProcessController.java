@@ -2,7 +2,9 @@ package com.example.assignment3;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class AddProcessController {
@@ -15,7 +17,9 @@ public class AddProcessController {
     @FXML
     private TextField priorityField;
     @FXML
-    private TextField quantumField; // حقل Quantum الذي سيتم ربطه
+    private TextField quantumField;
+    @FXML
+    private ColorPicker colorPicker;
 
     private Process newProcess;
     private boolean isConfirmed = false;
@@ -36,6 +40,7 @@ public class AddProcessController {
             int arrivalTime = Integer.parseInt(arrivalTimeField.getText());
             int burstTime = Integer.parseInt(burstTimeField.getText());
             int priority = Integer.parseInt(priorityField.getText());
+            Color color = colorPicker.getValue();
 
             // تحقق من صحة البيانات المدخلة
             if (name.isEmpty()) {
@@ -44,7 +49,7 @@ public class AddProcessController {
             }
 
             // إنشاء عملية جديدة باستخدام البيانات المدخلة
-            newProcess = new Process(name, arrivalTime, burstTime, priority, 0);
+            newProcess = new Process(name, arrivalTime, burstTime, priority, 0,color);
             isConfirmed = true;
             closeWindow();
         } catch (NumberFormatException e) {

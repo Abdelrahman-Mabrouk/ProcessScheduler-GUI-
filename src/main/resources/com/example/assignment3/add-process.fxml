@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      alignment="CENTER" spacing="10" fx:controller="com.example.assignment3.AddProcessController">
-    <Label text="Add New Process" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-    <TextField fx:id="nameField" promptText="Process Name"/>
-    <TextField fx:id="arrivalTimeField" promptText="Arrival Time"/>
-    <TextField fx:id="burstTimeField" promptText="Burst Time"/>
-    <TextField fx:id="priorityField" promptText="Priority"/>
-    <TextField fx:id="quantumField" promptText="Quantum (Only for FCAI)" visible="false"/> <!-- Hiding the quantum field initially -->
+<VBox alignment="CENTER" prefHeight="321.0" prefWidth="340.0" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.assignment3.AddProcessController">
+    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Add New Process" />
+    <TextField fx:id="nameField" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="26.0" prefWidth="182.0" promptText="Process Name" />
+    <TextField fx:id="arrivalTimeField" maxWidth="-Infinity" prefHeight="26.0" prefWidth="184.0" promptText="Arrival Time" />
+    <TextField fx:id="burstTimeField" maxWidth="-Infinity" prefHeight="26.0" prefWidth="183.0" promptText="Burst Time" />
+    <TextField fx:id="priorityField" maxWidth="-Infinity" prefHeight="26.0" prefWidth="183.0" promptText="Priority" /> <!-- Hiding the quantum field initially -->
+    <ColorPicker fx:id="colorPicker" blendMode="DARKEN" maxWidth="-Infinity" prefHeight="26.0" prefWidth="182.0" promptText="Choose Process Color" />
+    <TextField fx:id="quantumField" promptText="Quantum (Only for FCAI)" visible="false" />
+
     <HBox spacing="10">
-        <Button text="Add" onAction="#onAddClicked"/>
-        <Button text="Cancel" onAction="#onCancelClicked"/>
+        <Button onAction="#onAddClicked" prefHeight="26.0" prefWidth="95.0" text="Add" textFill="#0a6100">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+         <HBox.margin>
+            <Insets left="50.0" />
+         </HBox.margin></Button>
+        <Button onAction="#onCancelClicked" prefHeight="26.0" prefWidth="95.0" text="Cancel" textFill="#ff1414" textOverrun="LEADING_ELLIPSIS">
+         <HBox.margin>
+            <Insets left="30.0" right="50.0" />
+         </HBox.margin>
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font></Button>
     </HBox>
 </VBox>

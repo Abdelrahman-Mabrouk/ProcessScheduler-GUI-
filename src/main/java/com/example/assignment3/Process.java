@@ -1,9 +1,8 @@
 package com.example.assignment3;
-
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.ObjectProperty;  // Import ObjectProperty
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
+import javafx.scene.paint.Color;
 
 public class Process {
     private final StringProperty name;
@@ -13,15 +12,19 @@ public class Process {
     private final IntegerProperty initialQuantum;
     private IntegerProperty waitingTime;
     private IntegerProperty turnaroundTime;
+    private ObjectProperty<Color> color;
+    private final StringProperty status; // إضافة خاصية الحالة
 
-    public Process(String name, int arrivalTime, int burstTime, int priority, int initialQuantum) {
+    public Process(String name, int arrivalTime, int burstTime, int priority, int initialQuantum , Color color) {
         this.name = new SimpleStringProperty(name);
         this.arrivalTime = new SimpleIntegerProperty(arrivalTime);
         this.burstTime = new SimpleIntegerProperty(burstTime);
         this.priority = new SimpleIntegerProperty(priority);
         this.initialQuantum = new SimpleIntegerProperty(initialQuantum);
-        this.waitingTime = new SimpleIntegerProperty(0); // Initially set to 0
-        this.turnaroundTime = new SimpleIntegerProperty(0); // Initially set to 0
+        this.waitingTime = new SimpleIntegerProperty(0);
+        this.turnaroundTime = new SimpleIntegerProperty(0);
+        this.color = new SimpleObjectProperty<>(color);
+        this.status = new SimpleStringProperty("Waiting");
     }
 
     // Getter methods
@@ -82,6 +85,19 @@ public class Process {
         return turnaroundTime;
     }
 
+
+    public Color getColor() {
+        return color.get();  // Getter for color
+    }
+
+    // Setter for color
+    public void setColor(Color color) {
+        this.color.set(color);  // Setter for color
+    }
+    public ObjectProperty<Color> colorProperty() {
+        return color;
+    }
+
     // Setter methods for Waiting Time and Turnaround Time
     public void setWaitingTime(int waitingTime) {
         this.waitingTime.set(waitingTime);
@@ -89,5 +105,21 @@ public class Process {
 
     public void setTurnaroundTime(int turnaroundTime) {
         this.turnaroundTime.set(turnaroundTime);
+    }
+
+    public String getStatus() {
+        return status.get();  // جلب الحالة
+    }
+    // Getter and setter for status
+    public void setStatus(String status) {
+        this.status.set(status);  // تعيين الحالة
+    }
+
+    public StringProperty statusProperty() {
+        return status;  // خاصية الحالة
+    }
+
+    public void setBurstTime(int burstTime) {
+        this.burstTime.set(burstTime);
     }
 }

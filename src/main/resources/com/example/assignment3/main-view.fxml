@@ -1,27 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.assignment3.SchedulerController" spacing="10" alignment="CENTER">
-  <Label text="CPU Scheduler Simulator" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+<VBox alignment="CENTER" prefHeight="638.0" prefWidth="968.0" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.assignment3.SchedulerController">
+    <Label maxWidth="-Infinity" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="CPU Scheduler Simulator" />
 
-  <TableView fx:id="processTable" prefWidth="600">
-    <columns>
-      <TableColumn text="Process" fx:id="colName"/>
-      <TableColumn text="Arrival Time" fx:id="colArrivalTime"/>
-      <TableColumn text="Burst Time" fx:id="colBurstTime"/>
-      <TableColumn text="Priority" fx:id="colPriority"/>
-      <TableColumn text="Waiting Time" fx:id="colWaitingTime"/>
-      <TableColumn text="Turnaround Time" fx:id="colTurnaroundTime"/>
-    </columns>
-  </TableView>
+    <AnchorPane prefHeight="600.0" prefWidth="726.0">
+        <SplitPane dividerPositions="0.5" prefHeight="600" prefWidth="968.0">
+            <!-- الجزء الأول: الرسم البياني -->
+            <items>
+                <AnchorPane prefHeight="606.0" prefWidth="852.0">
+               <ScrollPane prefWidth="944.0">
+                  <content>
+                          <Canvas fx:id="schedulerCanvas" height="603.0" width="1493.0" />
+                  </content>
+               </ScrollPane>
+                </AnchorPane>
 
-
-  <!-- ComboBox will be populated in Controller -->
-  <ComboBox fx:id="algorithmComboBox" onAction="#onAlgorithmSelected"/>
-
-  <Button text="Load Processes from TXT File" onAction="#onLoadFromFile"/>
-  <Button text="Add Process" onAction="#onAddProcess"/>
-  <Button text="Run Scheduler" onAction="#onRunScheduler"/>
+                <!-- الجزء الثاني: الجدول -->
+                <AnchorPane maxWidth="1.7976931348623157E308" prefHeight="599.0" prefWidth="432.0">
+                    <TableView fx:id="processTable" prefHeight="336.0" prefWidth="397.0">
+                        <columns>
+                            <TableColumn fx:id="colName" text="Process" />
+                            <TableColumn fx:id="colArrivalTime" text="Arrival Time" />
+                            <TableColumn fx:id="colBurstTime" text="Burst Time" />
+                            <TableColumn fx:id="colPriority" text="Priority" />
+                            <TableColumn fx:id="colWaitingTime" text="Waiting Time" />
+                            <TableColumn fx:id="colTurnaroundTime" text="Turnaround Time" />
+                            <TableColumn fx:id="colColor" text="Color" />
+                        </columns>
+                    </TableView>
+         
+                 <!-- باقي المكونات مثل الأزرار والـ ComboBox -->
+                 <Button layoutX="115.0" layoutY="360.0" onAction="#onLoadFromFile" text="Load Processes from TXT File" />
+                 <Button layoutX="115.0" layoutY="398.0" onAction="#onAddProcess" prefHeight="26.0" prefWidth="169.0" text="Add Process" />
+                 <ComboBox fx:id="algorithmComboBox" layoutX="116.0" layoutY="446.0" onAction="#onAlgorithmSelected" prefHeight="26.0" prefWidth="168.0" promptText="Scheduler Algorithm" />
+                 <Button layoutX="113.0" layoutY="491.0" onAction="#onRunScheduler" prefHeight="26.0" prefWidth="173.0" text="Run Scheduler" />
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </AnchorPane>
 </VBox>
