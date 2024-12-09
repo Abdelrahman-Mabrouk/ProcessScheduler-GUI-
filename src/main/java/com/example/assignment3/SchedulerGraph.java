@@ -3,43 +3,30 @@ package com.example.assignment3;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
+import java.util.List;
 
 public class SchedulerGraph extends Canvas {
     public SchedulerGraph(double width, double height) {
         super(width, height);
     }
 
-    public void drawProcessGraph(Process[] processes) {
+    // هذا الكود يحدد كيف يتم رسم العمليات في الجراف
+    public void drawProcessGraph(List<Process> processes) {
         GraphicsContext gc = this.getGraphicsContext2D();
-        gc.clearRect(0, 0, this.getWidth(), this.getHeight()); // مسح الـ Canvas
+        gc.clearRect(0, 0, this.getWidth(), this.getHeight());  // Clear the canvas before drawing
 
-        double rowHeight = this.getHeight() / processes.length; // ارتفاع كل صف
-        double widthPerTimeUnit = (this.getWidth() - 100) / getTotalExecutionTime(processes); // عرض الزمن مع ترك مساحة للأسماء
-        double labelOffset = 80; // الإزاحة الأفقية للأسماء
+        double widthPerProcess = this.getWidth() / processes.size();  // calculate width per process
 
-        for (int i = 0; i < processes.length; i++) {
-            Process process = processes[i];
+        for (int i = 0; i < processes.size(); i++) {
+            Process process = processes.get(i);
+            double xPosition = i * widthPerProcess;  // position for each process in the row
+            double yPosition = 50;  // row height, adjust as needed
 
-            // رسم اسم العملية في أقصى اليسار
-            gc.setFill(Color.BLACK);
-            gc.setFont(new Font("Arial", 14));
-            gc.fillText(process.getName(), 5, (i + 0.5) * rowHeight); // اسم العملية في أقصى اليسار
-
-            // رسم المستطيل الملون بعد الاسم
             gc.setFill(process.getColor());
-            double rectX = labelOffset; // بداية المستطيل بعد الإزاحة
-            double rectWidth = process.getBurstTime() * widthPerTimeUnit; // عرض المستطيل بناءً على الـ Burst Time
-            double rectY = i * rowHeight; // بداية الصف
-            gc.fillRect(rectX, rectY, rectWidth, rowHeight - 5); // رسم المستطيل مع ترك مسافة صغيرة بين الصفوف
-        }
-    }
+            gc.fillRect(xPosition, yPosition, widthPerProcess, 50);  // drawing a rectangle for each process
 
-    private double getTotalExecutionTime(Process[] processes) {
-        double totalTime = 0;
-        for (Process process : processes) {
-            totalTime += process.getBurstTime();
+            gc.setFill(Color.BLACK);
+            gc.fillText(process.getName(), xPosition + widthPerProcess / 2, yPosition + 25);  // drawing the process name
         }
-        return totalTime;
     }
 }

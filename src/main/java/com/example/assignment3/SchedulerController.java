@@ -1,4 +1,6 @@
 package com.example.assignment3;
+import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.paint.Color;
 
 import javafx.collections.ObservableList;
@@ -11,24 +13,14 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-
-
-
 import java.io.IOException;
-
 import javafx.scene.control.ComboBox;
-
-
-
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 
@@ -61,16 +53,27 @@ public class SchedulerController {
 
     @FXML
     public void initialize() {
-        colName.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        colArrivalTime.setCellValueFactory(cellData -> cellData.getValue().arrivalTimeProperty().asObject());
-        colBurstTime.setCellValueFactory(cellData -> cellData.getValue().burstTimeProperty().asObject());
-        colPriority.setCellValueFactory(cellData -> cellData.getValue().priorityProperty().asObject());
-        colWaitingTime.setCellValueFactory(cellData -> cellData.getValue().waitingTimeProperty().asObject());
-        colTurnaroundTime.setCellValueFactory(cellData -> cellData.getValue().turnaroundTimeProperty().asObject());
+        // إعداد العمود الخاص بالاسم
+        colName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+
+        // إعداد العمود الخاص بـ Arrival Time
+        colArrivalTime.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getArrivalTime()).asObject());
+
+        // إعداد العمود الخاص بـ Burst Time
+        colBurstTime.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getBurstTime()).asObject());
+
+        // إعداد العمود الخاص بـ Priority
+        colPriority.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getPriority()).asObject());
+
+        // إعداد العمود الخاص بـ Waiting Time
+        colWaitingTime.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getWT()).asObject());
+
+        // إعداد العمود الخاص بـ Turnaround Time
+        colTurnaroundTime.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getTAT()).asObject());
 
         // إعداد عمود اللون
-        colColor.setCellValueFactory(cellData -> cellData.getValue().colorProperty());
-        colColor.setCellFactory(column -> new TableCell<Process, Color>() {
+        colColor.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getColor()));
+        colColor.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(Color color, boolean empty) {
                 super.updateItem(color, empty);
@@ -78,20 +81,22 @@ public class SchedulerController {
                     setText(null);
                     setStyle("");
                 } else {
-                    setText("");
+                    setText(""); // لا نعرض نص
                     setStyle("-fx-background-color: " + toHex(color) + ";");
                 }
             }
         });
 
+        // إضافة الخيارات إلى القائمة المنسدلة
         algorithmComboBox.getItems().addAll(
                 "Priority Scheduling",
                 "Shortest Job First (SJF)",
                 "Shortest Remaining Time First (SRTF)",
                 "FCAI Scheduling"
         );
-        processTable.setItems(processList);
 
+        // تعيين قائمة العناصر للجدول
+        processTable.setItems(processList);
     }
 
     private String toHex(Color color) {
@@ -131,27 +136,24 @@ public class SchedulerController {
 
         processTable.getItems().setAll(scheduledProcesses);
 
-        // تحويل العمليات إلى مصفوفة لاستخدامها في الرسم البياني
-        Process[] processArray = new Process[scheduledProcesses.size()];
-        scheduledProcesses.toArray(processArray);
-
         // إنشاء كائن الرسم البياني
         SchedulerGraph schedulerGraph = new SchedulerGraph(800, 400);
 
         // رسم العمليات على الجراف
-        schedulerGraph.drawProcessGraph(processArray);
+        schedulerGraph.drawProcessGraph(scheduledProcesses);  // passing List<Process> here
 
         // إضافة الرسم البياني إلى الواجهة
-        schedulerCanvas.getGraphicsContext2D().drawImage(schedulerGraph.snapshot(null, null), 0, 0);
+        schedulerCanvas.getGraphicsContext2D().clearRect(0, 0, schedulerCanvas.getWidth(), schedulerCanvas.getHeight());  // Clear the canvas before drawing
+        schedulerCanvas.getGraphicsContext2D().drawImage(schedulerGraph.snapshot(null, null), 0, 0);  // Ensure canvas is cleared first
     }
 
-    private void updateGraph() {
-        // هنا نرسل البيانات للرسم البياني (Canvas)
-        SchedulerGraph schedulerGraph = new SchedulerGraph(schedulerCanvas.getWidth(), schedulerCanvas.getHeight());
-        Process[] processesArray = processList.toArray(new Process[0]);
-        schedulerGraph.drawProcessGraph(processesArray);
-    }
 
+
+//    public void updateGraph() {
+//        SchedulerGraph schedulerGraph = new SchedulerGraph(schedulerCanvas.getWidth(), schedulerCanvas.getHeight());
+//        schedulerGraph.drawProcessGraph(scheduledProcesses);  // حيث `scheduledProcesses` هي العمليات المحسوبة
+//        schedulerCanvas.getGraphicsContext2D().drawImage(schedulerGraph.snapshot(null, null), 0, 0);  // إضافة الجراف إلى الـ Canvas
+//    }
 
 
 
@@ -251,49 +253,6 @@ public class SchedulerController {
             // الحصول على الخوارزمية المختارة
             String selectedAlgorithm = algorithmComboBox.getValue();
             System.out.println("Selected algorithm: " + selectedAlgorithm);
-        }
-
-
-
-        // Helper method to calculate the average waiting time
-        private double getAverageWaitingTime(List<Process> processes) {
-            double totalWaitingTime = 0;
-            for (Process process : processes) {
-                totalWaitingTime += process.getWaitingTime();
-            }
-            return totalWaitingTime / processes.size();
-        }
-
-        // Helper method to calculate the average turnaround time
-        private double getAverageTurnaroundTime(List<Process> processes) {
-            double totalTurnaroundTime = 0;
-            for (Process process : processes) {
-                totalTurnaroundTime += process.getTurnaroundTime();
-            }
-            return totalTurnaroundTime / processes.size();
-        }
-
-        // Update Gantt chart based on process execution order
-
-        public void calculateTimes() {
-            int totalWaitingTime = 0;
-            int totalTurnaroundTime = 0;
-
-            for (Process process : processList) {
-                // حساب turnaround time و waiting time
-                int turnaroundTime = process.getBurstTime() + process.getArrivalTime(); // مثال حساب turnaround
-                process.setTurnaroundTime(turnaroundTime);
-
-                int waitingTime = turnaroundTime - process.getBurstTime() - process.getArrivalTime();
-                process.setWaitingTime(waitingTime);
-
-                totalWaitingTime += waitingTime;
-                totalTurnaroundTime += turnaroundTime;
-            }
-
-            // عرض النتائج
-            System.out.println("Average Waiting Time: " + (totalWaitingTime / processList.size()));
-            System.out.println("Average Turnaround Time: " + (totalTurnaroundTime / processList.size()));
         }
 
         // Show error alert
