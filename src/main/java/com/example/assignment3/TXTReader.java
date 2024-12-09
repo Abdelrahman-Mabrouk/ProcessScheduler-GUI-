@@ -19,12 +19,12 @@ public class TXTReader {
 
                 if (data.length == 6) {  // تعديل لتتناسب مع 6 قيم (اسم، وقت الوصول، وقت الانفجار، الأولوية، Quantum، اللون)
                     String name = data[0];
-                    int arrivalTime = Integer.parseInt(data[1]);
-                    int burstTime = Integer.parseInt(data[2]);
+                    int burstTime = Integer.parseInt(data[1]);
+                    int arrivalTime = Integer.parseInt(data[2]);
                     int priority = Integer.parseInt(data[3]);
                     int initialQuantum = Integer.parseInt(data[4]);
                     Color color = getColorByName(data[5]);
-                    processes.add(new Process(name, arrivalTime, burstTime, priority, initialQuantum, color));  // تمرير اللون
+                    processes.add(new Process(name, color , arrivalTime, burstTime, priority, initialQuantum));  // تمرير اللون
                 }
             }
         }

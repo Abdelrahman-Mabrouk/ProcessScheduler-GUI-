@@ -1,21 +1,15 @@
 package com.example.assignment3;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.XYChart;
 import javafx.collections.FXCollections;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -50,6 +44,8 @@ public class SchedulerController {
     private Canvas schedulerCanvas;  // الـ Canvas الذي سنرسم عليه
 
     private ObservableList<Process> processList = FXCollections.observableArrayList();  // ObservableList لعرض العمليات في الـ Table
+    private List<Process> originalProcesses = new ArrayList<>(); // قائمة العمليات الأصلية
+
 
     @FXML
     public void initialize() {
@@ -66,10 +62,10 @@ public class SchedulerController {
         colPriority.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getPriority()).asObject());
 
         // إعداد العمود الخاص بـ Waiting Time
-        colWaitingTime.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getWT()).asObject());
+        colWaitingTime.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getWaitTime()).asObject());
 
         // إعداد العمود الخاص بـ Turnaround Time
-        colTurnaroundTime.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getTAT()).asObject());
+        colTurnaroundTime.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getTurnAround()).asObject());
 
         // إعداد عمود اللون
         colColor.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getColor()));
@@ -102,12 +98,19 @@ public class SchedulerController {
     private String toHex(Color color) {
         return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255), (int) (color.getBlue() * 255));
     }
-
-
+    private void resetProcesses() {
+        processList.clear();
+        for (Process process : originalProcesses) {
+            processList.add(process.copy()); // أنشئ نسخة جديدة لكل عملية
+        }
+        processTable.refresh(); // تأكد من تحديث الجدول
+    }
     @FXML
     public void onRunScheduler() {
-        String selectedAlgorithm = algorithmComboBox.getValue();
+        // إعادة تعيين العمليات إلى حالتها الأصلية
+        resetProcesses();
 
+        String selectedAlgorithm = algorithmComboBox.getValue();
         if (selectedAlgorithm == null) {
             showError("No Algorithm Selected", "Please select a scheduling algorithm.");
             return;
@@ -118,16 +121,16 @@ public class SchedulerController {
         // اختيار الخوارزمية لتشغيلها
         switch (selectedAlgorithm) {
             case "Priority Scheduling":
-                scheduledProcesses = Scheduler.priorityScheduling(new ArrayList<>(processList));
+                scheduledProcesses = Scheduler.priorityScheduling(new ArrayList<>(processList),0);
                 break;
             case "Shortest Job First (SJF)":
-                scheduledProcesses = Scheduler.sjfScheduling(new ArrayList<>(processList));
+                scheduledProcesses = Scheduler.sjfScheduling(new ArrayList<>(processList),0);
                 break;
             case "Shortest Remaining Time First (SRTF)":
-                scheduledProcesses = Scheduler.srtfScheduling(new ArrayList<>(processList));
+                scheduledProcesses = Scheduler.srtfScheduling(new ArrayList<>(processList),0);
                 break;
             case "FCAI Scheduling":
-                scheduledProcesses = Scheduler.fcaiScheduling(new ArrayList<>(processList));
+                scheduledProcesses = Scheduler.fcaiScheduling(new ArrayList<>(processList),0);
                 break;
             default:
                 showError("Unknown Algorithm", "Selected algorithm is not recognized.");
@@ -136,59 +139,57 @@ public class SchedulerController {
 
         processTable.getItems().setAll(scheduledProcesses);
 
+        updateGraph(scheduledProcesses);
+    }
+
+    private void updateGraph(List<Process> scheduledProcesses) {
+        // تنظيف الجراف قبل رسم البيانات الجديدة
+        GraphicsContext gc = schedulerCanvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, schedulerCanvas.getWidth(), schedulerCanvas.getHeight());  // تنظيف الجراف
+
+        // تحويل العمليات إلى مصفوفة لاستخدامها في الرسم البياني
+        Process[] processArray = new Process[scheduledProcesses.size()];
+        scheduledProcesses.toArray(processArray);
+
         // إنشاء كائن الرسم البياني
         SchedulerGraph schedulerGraph = new SchedulerGraph(800, 400);
 
         // رسم العمليات على الجراف
-        schedulerGraph.drawProcessGraph(scheduledProcesses);  // passing List<Process> here
+        schedulerGraph.drawProcessGraph(List.of(processArray));  // رسم العمليات في الجراف
 
         // إضافة الرسم البياني إلى الواجهة
-        schedulerCanvas.getGraphicsContext2D().clearRect(0, 0, schedulerCanvas.getWidth(), schedulerCanvas.getHeight());  // Clear the canvas before drawing
-        schedulerCanvas.getGraphicsContext2D().drawImage(schedulerGraph.snapshot(null, null), 0, 0);  // Ensure canvas is cleared first
+        gc.drawImage(schedulerGraph.snapshot(null, null), 0, 0);  // إضافة الرسم البياني إلى الجراف
     }
 
 
 
-//    public void updateGraph() {
-//        SchedulerGraph schedulerGraph = new SchedulerGraph(schedulerCanvas.getWidth(), schedulerCanvas.getHeight());
-//        schedulerGraph.drawProcessGraph(scheduledProcesses);  // حيث `scheduledProcesses` هي العمليات المحسوبة
-//        schedulerCanvas.getGraphicsContext2D().drawImage(schedulerGraph.snapshot(null, null), 0, 0);  // إضافة الجراف إلى الـ Canvas
-//    }
+    @FXML
+    public void onAddProcess() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("add-process.fxml"));
+            Stage stage = new Stage();
+            stage.setScene(new Scene(loader.load()));
+            stage.setTitle("Add Process");
+            stage.showAndWait();
 
+            AddProcessController controller = loader.getController();
 
+            if (controller.isConfirmed()) {
+                Process newProcess = controller.getNewProcess();
+                processList.add(newProcess);
 
-        @FXML
-        public void onAddProcess() {
-            try {
-                // فتح نافذة إضافة عملية جديدة
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("add-process.fxml"));
-                Stage stage = new Stage();
-                stage.setScene(new Scene(loader.load()));
-                stage.setTitle("Add Process");
-                stage.showAndWait();  // الانتظار حتى يتم إغلاق النافذة
-
-                // الحصول على الـ Controller من النافذة التي تم فتحها
-                AddProcessController controller = loader.getController();
-
-                // إذا تم تأكيد العملية من قبل المستخدم
-                if (controller.isConfirmed()) {
-                    Process newProcess = controller.getNewProcess();  // استلام العملية الجديدة
-
-                    // تحقق من وجود عملية بنفس الاسم
-                    boolean exists = processList.stream()
-                            .anyMatch(process -> process.getName().equalsIgnoreCase(newProcess.getName()));
-
-                    if (exists) {
-                        showError("Duplicate Process", "A process with this name already exists.");
-                    } else {
-                        // إضافة العملية الجديدة إلى القائمة
-                        processList.add(newProcess);  // استخدام processList الذي هو ObservableList
-                    }
+                // تحديث النسخة الأصلية
+                this.originalProcesses.clear();
+                for (Process process : processList) {
+                    this.originalProcesses.add(process.copy());
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+
+                processTable.refresh();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 
 
 
@@ -204,6 +205,7 @@ public class SchedulerController {
             if (selectedFile != null) {
                 try {
                     List<Process> processesFromFile = TXTReader.readProcessesFromTXT(selectedFile.getAbsolutePath());
+                    loadProcesses(processesFromFile);
 
                     for (Process process : processesFromFile) {
                         // تحقق من وجود لون للبروسس
@@ -223,8 +225,24 @@ public class SchedulerController {
             }
         }
 
+    public void loadProcesses(List<Process> processes) {
+        // مسح قائمة العمليات الحالية
+        this.processList.clear();
+        this.processList.addAll(processes); // إضافة العمليات إلى القائمة الحالية
 
-        private Color askForColor(String processName) {
+        // حفظ نسخة من العمليات الأصلية
+        this.originalProcesses.clear();
+        for (Process process : processes) {
+            this.originalProcesses.add(process.copy()); // إنشاء نسخة جديدة من كل عملية
+        }
+
+        // تحديث الجدول لعرض العمليات الجديدة
+        processTable.setItems(FXCollections.observableArrayList(processList));
+        processTable.refresh();
+    }
+
+
+    private Color askForColor(String processName) {
             // نافذة لاختيار اللون باستخدام ColorPicker
             ColorPicker colorPicker = new ColorPicker();
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);

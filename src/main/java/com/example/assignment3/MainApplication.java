@@ -12,6 +12,7 @@ public class MainApplication extends Application {
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("CPU Scheduler Simulator");
         stage.setScene(scene);
+
         stage.show();
     }
 

@@ -78,5 +78,9 @@
          <Insets />
       </opaqueInsets>
    </SplitPane>
-        <Canvas fx:id="schedulerCanvas" height="120.0" width="881.0" />
+   <ScrollPane prefHeight="200.0" prefWidth="200.0">
+      <content>
+              <Canvas fx:id="schedulerCanvas" height="120.0" width="1550.0" />
+      </content>
+   </ScrollPane>
 </VBox>

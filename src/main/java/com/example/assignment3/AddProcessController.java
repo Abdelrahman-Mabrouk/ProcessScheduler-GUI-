@@ -49,7 +49,7 @@ public class AddProcessController {
             }
 
             // إنشاء عملية جديدة باستخدام البيانات المدخلة
-            newProcess = new Process(name, arrivalTime, burstTime, priority, 0,color);
+            newProcess = new Process(name,color, arrivalTime, burstTime, priority, 0);
             isConfirmed = true;
             closeWindow();
         } catch (NumberFormatException e) {
